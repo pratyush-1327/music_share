@@ -266,11 +266,15 @@ class ShareIntentService extends ChangeNotifier {
             availableLinks.add(ServiceLink(service: service, url: resolved));
             addedIds.add(service.id);
             debugPrint('PlatformResolver: Found ${service.id} -> $resolved');
+          } else if (trackName != null && trackName.isNotEmpty) {
+            final searchUrl = MusicServices.generateSearchLink(service, trackName, artistName);
+            if (searchUrl.isNotEmpty) {
+              availableLinks.add(ServiceLink(service: service, url: searchUrl));
+              addedIds.add(service.id);
+            }
           }
         }
 
-        // Only add services that we have direct links for — no search URLs
-        // If a platform has no direct link, just leave it out
         debugPrint('Final available platforms (${availableLinks.length}): '
             '${availableLinks.map((l) => l.service.id).join(', ')}');
 
@@ -310,6 +314,12 @@ class ShareIntentService extends ChangeNotifier {
             if (resolved != null) {
               availableLinks.add(ServiceLink(service: service, url: resolved));
               addedIds.add(service.id);
+            } else if (trackName != null && trackName.isNotEmpty) {
+              final searchUrl = MusicServices.generateSearchLink(service, trackName, artistName);
+              if (searchUrl.isNotEmpty) {
+                availableLinks.add(ServiceLink(service: service, url: searchUrl));
+                addedIds.add(service.id);
+              }
             }
           }
 

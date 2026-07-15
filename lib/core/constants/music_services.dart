@@ -104,7 +104,10 @@ class MusicServices {
         appleMusic,
         youtubeMusic,
         youtube,
+        soundCloud,
+        deezer,
         amazonMusic,
+        tidal,
       ];
 
   static String generateLink(MusicService service, String trackId) {
@@ -140,9 +143,9 @@ class MusicServices {
   }
 
   static String generateSearchLink(MusicService service, String? trackName, String? artistName) {
-    final query = Uri.encodeComponent(
-      [trackName, artistName].where((s) => s != null && s.isNotEmpty).join(' '),
-    );
+    final queryParts = [trackName, artistName].where((s) => s != null && s.isNotEmpty).toList();
+    if (queryParts.isEmpty) return '';
+    final query = Uri.encodeComponent(queryParts.join(' '));
     switch (service.id) {
       case 'spotify':
         return 'https://open.spotify.com/search/$query';
@@ -152,8 +155,14 @@ class MusicServices {
         return 'https://music.youtube.com/search?q=$query';
       case 'youtube':
         return 'https://www.youtube.com/results?search_query=$query';
+      case 'soundcloud':
+        return 'https://soundcloud.com/search?q=$query';
+      case 'deezer':
+        return 'https://www.deezer.com/search/$query';
       case 'amazon_music':
         return 'https://music.amazon.com/search/$query';
+      case 'tidal':
+        return 'https://listen.tidal.com/search?q=$query';
       default:
         return '';
     }

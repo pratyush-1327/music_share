@@ -110,6 +110,24 @@ class LinkParser {
     );
   }
 
+  static bool isGenericTitleOrId(String title) {
+    final clean = title.trim().toLowerCase();
+    
+    // Check common generic words
+    final genericWords = {
+      'music', 'track', 'song', 'album', 'watch', 'browse', 'search', 'video', 'audio',
+      'spotify', 'apple music', 'youtube', 'youtube music', 'soundcloud', 'deezer', 'tidal', 'amazon music', 'web player'
+    };
+    if (genericWords.contains(clean)) return true;
+
+    // Check if it's a typical base62 ID or hash (no spaces, length >= 10, alphanumeric)
+    if (!clean.contains(' ') && clean.length >= 10 && RegExp(r'^[a-z0-9]+$', caseSensitive: false).hasMatch(clean)) {
+      return true;
+    }
+
+    return false;
+  }
+
   static List<ServiceLink> _generateAvailableLinks({
     required String originalUrl,
     required MusicService? sourceService,
@@ -120,87 +138,81 @@ class LinkParser {
     final availableLinks = <ServiceLink>[];
 
     // Build query for search links
-    String searchQuery = 'music';
+    String? searchQuery;
     if (trackName != null && artistName != null) {
       searchQuery = '$trackName $artistName';
     } else if (trackName != null) {
       searchQuery = trackName;
     } else if (originalUrl.isNotEmpty) {
-      searchQuery = _extractTitleFromUrl(originalUrl) ?? 'music';
+      // Only extract title from URL if the service stores the title in the URL path
+      final canExtract = sourceService == null ||
+          sourceService.id == 'soundcloud' ||
+          (sourceService.id == 'apple_music' && originalUrl.contains('/album/'));
+      if (canExtract) {
+        final extracted = _extractTitleFromUrl(originalUrl);
+        if (extracted != null && !isGenericTitleOrId(extracted)) {
+          searchQuery = extracted;
+        }
+      }
     }
-    final encodedQuery = Uri.encodeComponent(searchQuery);
+
+    final encodedQuery = searchQuery != null && searchQuery.isNotEmpty ? Uri.encodeComponent(searchQuery) : null;
 
     // 1. Spotify
-    String spotifyUrl;
     if (sourceService?.id == 'spotify' && trackId != null) {
-      spotifyUrl = 'https://open.spotify.com/track/$trackId';
-    } else {
-      spotifyUrl = 'https://open.spotify.com/search/$encodedQuery';
+      availableLinks.add(ServiceLink(service: MusicServices.spotify, url: 'https://open.spotify.com/track/$trackId'));
+    } else if (encodedQuery != null) {
+      availableLinks.add(ServiceLink(service: MusicServices.spotify, url: 'https://open.spotify.com/search/$encodedQuery'));
     }
-    availableLinks.add(ServiceLink(service: MusicServices.spotify, url: spotifyUrl));
 
     // 2. Apple Music
-    String appleMusicUrl;
     if (sourceService?.id == 'apple_music' && trackId != null) {
-      appleMusicUrl = 'https://music.apple.com/song/$trackId';
-    } else {
-      appleMusicUrl = 'https://music.apple.com/search?term=$encodedQuery';
+      availableLinks.add(ServiceLink(service: MusicServices.appleMusic, url: 'https://music.apple.com/song/$trackId'));
+    } else if (encodedQuery != null) {
+      availableLinks.add(ServiceLink(service: MusicServices.appleMusic, url: 'https://music.apple.com/search?term=$encodedQuery'));
     }
-    availableLinks.add(ServiceLink(service: MusicServices.appleMusic, url: appleMusicUrl));
 
     // 3. YouTube Music
-    String youtubeMusicUrl;
     if ((sourceService?.id == 'youtube_music' || sourceService?.id == 'youtube') && trackId != null) {
-      youtubeMusicUrl = 'https://music.youtube.com/watch?v=$trackId';
-    } else {
-      youtubeMusicUrl = 'https://music.youtube.com/search?q=$encodedQuery';
+      availableLinks.add(ServiceLink(service: MusicServices.youtubeMusic, url: 'https://music.youtube.com/watch?v=$trackId'));
+    } else if (encodedQuery != null) {
+      availableLinks.add(ServiceLink(service: MusicServices.youtubeMusic, url: 'https://music.youtube.com/search?q=$encodedQuery'));
     }
-    availableLinks.add(ServiceLink(service: MusicServices.youtubeMusic, url: youtubeMusicUrl));
 
     // 4. YouTube
-    String youtubeUrl;
     if ((sourceService?.id == 'youtube_music' || sourceService?.id == 'youtube') && trackId != null) {
-      youtubeUrl = 'https://youtu.be/$trackId';
-    } else {
-      youtubeUrl = 'https://www.youtube.com/results?search_query=$encodedQuery';
+      availableLinks.add(ServiceLink(service: MusicServices.youtube, url: 'https://youtu.be/$trackId'));
+    } else if (encodedQuery != null) {
+      availableLinks.add(ServiceLink(service: MusicServices.youtube, url: 'https://www.youtube.com/results?search_query=$encodedQuery'));
     }
-    availableLinks.add(ServiceLink(service: MusicServices.youtube, url: youtubeUrl));
 
     // 5. SoundCloud
-    String soundCloudUrl;
-    if (sourceService?.id == 'soundcloud' && trackId != null) {
-      soundCloudUrl = 'https://soundcloud.com/search?q=$encodedQuery';
-    } else {
-      soundCloudUrl = 'https://soundcloud.com/search?q=$encodedQuery';
+    if (sourceService?.id == 'soundcloud') {
+      availableLinks.add(ServiceLink(service: MusicServices.soundCloud, url: originalUrl));
+    } else if (encodedQuery != null) {
+      availableLinks.add(ServiceLink(service: MusicServices.soundCloud, url: 'https://soundcloud.com/search?q=$encodedQuery'));
     }
-    availableLinks.add(ServiceLink(service: MusicServices.soundCloud, url: soundCloudUrl));
 
     // 6. Deezer
-    String deezerUrl;
     if (sourceService?.id == 'deezer' && trackId != null) {
-      deezerUrl = 'https://www.deezer.com/track/$trackId';
-    } else {
-      deezerUrl = 'https://www.deezer.com/search/$encodedQuery';
+      availableLinks.add(ServiceLink(service: MusicServices.deezer, url: 'https://www.deezer.com/track/$trackId'));
+    } else if (encodedQuery != null) {
+      availableLinks.add(ServiceLink(service: MusicServices.deezer, url: 'https://www.deezer.com/search/$encodedQuery'));
     }
-    availableLinks.add(ServiceLink(service: MusicServices.deezer, url: deezerUrl));
 
     // 7. Amazon Music
-    String amazonMusicUrl;
     if (sourceService?.id == 'amazon_music' && trackId != null) {
-      amazonMusicUrl = 'https://music.amazon.com/search/$encodedQuery';
-    } else {
-      amazonMusicUrl = 'https://music.amazon.com/search/$encodedQuery';
+      availableLinks.add(ServiceLink(service: MusicServices.amazonMusic, url: 'https://music.amazon.com/search/$encodedQuery'));
+    } else if (encodedQuery != null) {
+      availableLinks.add(ServiceLink(service: MusicServices.amazonMusic, url: 'https://music.amazon.com/search/$encodedQuery'));
     }
-    availableLinks.add(ServiceLink(service: MusicServices.amazonMusic, url: amazonMusicUrl));
 
     // 8. Tidal
-    String tidalUrl;
     if (sourceService?.id == 'tidal' && trackId != null) {
-      tidalUrl = 'https://listen.tidal.com/track/$trackId';
-    } else {
-      tidalUrl = 'https://listen.tidal.com/search?q=$encodedQuery';
+      availableLinks.add(ServiceLink(service: MusicServices.tidal, url: 'https://listen.tidal.com/track/$trackId'));
+    } else if (encodedQuery != null) {
+      availableLinks.add(ServiceLink(service: MusicServices.tidal, url: 'https://listen.tidal.com/search?q=$encodedQuery'));
     }
-    availableLinks.add(ServiceLink(service: MusicServices.tidal, url: tidalUrl));
 
     return availableLinks;
   }
