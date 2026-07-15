@@ -137,70 +137,102 @@ class PlatformResolver {
     }
   }
 
-  /// Spotify: Search + scrape for track URIs
+  static String? _accessToken;
+  static DateTime? _tokenExpiry;
+
+  /// Spotify: Use Web API with Client Credentials flow
   static Future<String?> _searchSpotify(String query) async {
     try {
+      // Get access token (cached)
+      if (_accessToken == null || _tokenExpiry == null || DateTime.now().isAfter(_tokenExpiry!)) {
+        final token = await _getSpotifyToken();
+        if (token == null) {
+          debugPrint('SpotifyAPI: No access token available');
+          return null;
+        }
+        _accessToken = token;
+        _tokenExpiry = DateTime.now().add(const Duration(minutes: 55));
+      }
+
+      // Search for tracks
       final encoded = Uri.encodeComponent(query);
-      final uri = Uri.parse('https://open.spotify.com/search/$encoded');
-      debugPrint('SpotifyScrape: Fetching $uri');
-      final response = await http.get(uri, headers: {
-        'User-Agent': 'Mozilla/5.0 (Linux; Android 14; SM-S908E) AppleWebKit/537.36',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-        'Accept-Language': 'en-US,en;q=0.9',
-        'Cookie': 'sp_t=; sp_landing=;',
-      });
-      if (response.statusCode != 200) return null;
+      final uri = Uri.parse('https://api.spotify.com/v1/search')
+          .replace(queryParameters: {'q': query, 'type': 'track', 'limit': '1'});
+      debugPrint('SpotifyAPI: Searching $uri');
+      final response = await http.get(
+        uri,
+        headers: {
+          'Authorization': 'Bearer $_accessToken',
+          'Accept': 'application/json',
+        },
+      );
 
-      final html = response.body;
-
-      // Method 1: Find spotify:track: URIs anywhere in the page
-      final uriMatches = RegExp(r'spotify[\s]*:[\s]*track[\s]*:[\s]*([a-zA-Z0-9]+)')
-          .allMatches(html);
-      if (uriMatches.isNotEmpty) {
-        final ids = uriMatches.map((m) => m.group(1)!.trim()).toSet().toList();
-        if (ids.isNotEmpty) {
-          final link = 'https://open.spotify.com/track/${ids[0]}';
-          debugPrint('SpotifyScrape: Found via URI -> $link');
-          return link;
+      if (response.statusCode != 200) {
+        debugPrint('SpotifyAPI: HTTP ${response.statusCode} — ${response.body}');
+        if (response.statusCode == 401) {
+          _accessToken = null; // Clear expired token
         }
+        return null;
       }
 
-      // Method 2: Find track subdomain URLs
-      final httpsMatches = RegExp(r'https://open\.spotify\.com/track/([a-zA-Z0-9]+)')
-          .allMatches(html);
-      if (httpsMatches.isNotEmpty) {
-        final ids = httpsMatches.map((m) => m.group(1)!.trim()).toSet().toList();
-        if (ids.isNotEmpty) {
-          final link = 'https://open.spotify.com/track/${ids[0]}';
-          debugPrint('SpotifyScrape: Found via HTTPS URL -> $link');
-          return link;
-        }
+      final data = jsonDecode(response.body) as Map<String, dynamic>;
+      final tracks = data['tracks'] as Map<String, dynamic>?;
+      if (tracks == null) return null;
+
+      final items = tracks['items'] as List<dynamic>?;
+      if (items == null || items.isEmpty) {
+        debugPrint('SpotifyAPI: No results');
+        return null;
       }
 
-      // Method 3: Look for JSON data with track info
-      // Spotify embeds data in various script formats
-      final jsonDataMatches = RegExp(
-        r'"uri"\s*:\s*"spotify:track:([a-zA-Z0-9]+)"',
-        caseSensitive: false,
-      ).allMatches(html);
-      if (jsonDataMatches.isNotEmpty) {
-        final ids = jsonDataMatches.map((m) => m.group(1)!.trim()).toSet().toList();
-        if (ids.isNotEmpty) {
-          final link = 'https://open.spotify.com/track/${ids[0]}';
-          debugPrint('SpotifyScrape: Found via JSON uri -> $link');
-          return link;
-        }
+      final first = items[0] as Map<String, dynamic>;
+      final id = first['id'] as String?;
+      if (id == null) {
+        debugPrint('SpotifyAPI: No ID in first result');
+        return null;
       }
 
-      // Method 4: Check page title for clues
-      final titleMatch = RegExp(r'<title>(.*?)</title>', caseSensitive: false, dotAll: true)
-          .firstMatch(html);
-      debugPrint('SpotifyScrape: Page title: ${titleMatch?.group(1)?.trim() ?? "not found"}');
+      // Check name similarity to verify match
+      final name = first['name'] as String? ?? '';
+      final artists = first['artists'] as List<dynamic>?;
+      final artistName = artists?.isNotEmpty == true
+          ? (artists![0] as Map<String, dynamic>)['name'] as String? ?? ''
+          : '';
 
-      debugPrint('SpotifyScrape: No track found (${html.length} bytes)');
-      return null;
+      final link = 'https://open.spotify.com/track/$id';
+      debugPrint('SpotifyAPI: Found "$name" by "$artistName" -> $link');
+      return link;
     } catch (e) {
-      debugPrint('SpotifyScrape error: $e');
+      debugPrint('SpotifyAPI error: $e');
+      return null;
+    }
+  }
+
+  static Future<String?> _getSpotifyToken() async {
+    if (SpotifyConfig.clientId == 'YOUR_CLIENT_ID') {
+      debugPrint('SpotifyAPI: Credentials not configured — set them in spotify_config.dart');
+      return null;
+    }
+    try {
+      final credentials = base64Encode(utf8.encode('${SpotifyConfig.clientId}:${SpotifyConfig.clientSecret}'));
+      final response = await http.post(
+        Uri.parse('https://accounts.spotify.com/api/token'),
+        headers: {
+          'Authorization': 'Basic $credentials',
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: {'grant_type': 'client_credentials'},
+      );
+
+      if (response.statusCode != 200) {
+        debugPrint('SpotifyAPI: Token error HTTP ${response.statusCode}');
+        return null;
+      }
+
+      final data = jsonDecode(response.body) as Map<String, dynamic>;
+      return data['access_token'] as String?;
+    } catch (e) {
+      debugPrint('SpotifyAPI: Token error $e');
       return null;
     }
   }
