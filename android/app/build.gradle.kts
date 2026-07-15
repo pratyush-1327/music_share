@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.music_share"
+    namespace = "com.example.pulse_share"
     compileSdk = 36
     ndkVersion = "28.2.13676358"
 
@@ -20,7 +20,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.example.music_share"
+        applicationId = "com.example.pulse_share"
         minSdk = flutter.minSdkVersion
         targetSdk = 36
         versionCode = flutter.versionCode

@@ -1,8 +1,11 @@
-# Music Share 🎵
+# PulseShare 🎵
 
-Music Share is a smart Flutter utility app designed to bridge the gap between music services. When you share a song from one music platform (e.g., YouTube Music, Spotify, Apple Music), Music Share intercepts the link, parses the track details (song name and artist), and dynamically generates sharing links for all other popular music platforms.
+PulseShare is a smart Flutter utility app designed to bridge the gap between music services. When you share a song from one music platform (e.g., YouTube Music, Spotify, Apple Music), PulseShare intercepts the link, parses the track details (song name and artist), and dynamically generates sharing links for all other popular music platforms.
 
-No more asking friends, *"Can you send me the Spotify link for this YouTube video?"* – just share it via Music Share!
+No more asking friends, *"Can you send me the Spotify link for this YouTube video?"* – just share it via PulseShare!
+
+> [!TIP]
+> You can download the latest pre-built release APK directly from the **[Releases](https://github.com/pratyush-1327/music_share/releases)** section of this repository.
 
 ---
 
@@ -53,7 +56,7 @@ lib/
 
 ```mermaid
 graph TD
-    A[User clicks Share in YouTube Music/Spotify] --> B[Selects 'Music Share' from Android Share Sheet]
+    A[User clicks Share in YouTube Music/Spotify] --> B[Selects 'PulseShare' from Android Share Sheet]
     B --> C[ShareIntentService catches URL & Text]
     C --> D[Regex extracts Song Title & Artist]
     D --> E[LinkParser generates matching direct links / search URLs]

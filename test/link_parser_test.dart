@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:music_share/features/share_handler/data/song_link_api.dart';
-import 'package:music_share/features/share_handler/data/metadata_fetcher.dart';
-import 'package:music_share/features/share_handler/data/repositories/link_parser.dart';
+import 'package:pulse_share/features/share_handler/data/song_link_api.dart';
+import 'package:pulse_share/features/share_handler/data/metadata_fetcher.dart';
+import 'package:pulse_share/features/share_handler/data/repositories/link_parser.dart';
 
 void main() {
   test('Test Spotify Link Parsing with no metadata', () {

@@ -7,11 +7,11 @@ import 'features/share_handler/presentation/screens/result_screen.dart';
 import 'features/share_handler/services/share_intent_service.dart';
 
 void main() {
-  runApp(const MusicShareApp());
+  runApp(const PulseShareApp());
 }
 
-class MusicShareApp extends StatelessWidget {
-  const MusicShareApp({super.key});
+class PulseShareApp extends StatelessWidget {
+  const PulseShareApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +25,7 @@ class MusicShareApp extends StatelessWidget {
         builder: (context) {
           return MaterialApp(
             navigatorKey: context.read<ShareIntentService>().navigatorKey,
-            title: 'Music Share',
+            title: 'PulseShare',
             debugShowCheckedModeBanner: false,
             theme: AppTheme.lightTheme,
             darkTheme: AppTheme.darkTheme,

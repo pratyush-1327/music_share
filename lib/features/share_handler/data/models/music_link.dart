@@ -1,4 +1,4 @@
-import 'package:music_share/core/constants/music_services.dart';
+import 'package:pulse_share/core/constants/music_services.dart';
 
 class MusicLink {
   final String originalUrl;
@@ -46,7 +46,7 @@ class MusicLink {
       buffer.writeln('🔗 ${link.service.name}: ${link.url}');
     }
     buffer.writeln();
-    buffer.writeln('Shared via Music Share');
+    buffer.writeln('Shared via PulseShare');
 
     return buffer.toString();
   }

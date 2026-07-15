@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:music_share/features/share_handler/services/share_intent_service.dart';
+import 'package:pulse_share/features/share_handler/services/share_intent_service.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -9,7 +9,7 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Music Share'),
+        title: const Text('PulseShare'),
         actions: [
           IconButton(
             icon: const Icon(Icons.info_outline),
@@ -21,17 +21,13 @@ class HomeScreen extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Container(
-              width: 120,
-              height: 120,
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.primaryContainer,
-                borderRadius: BorderRadius.circular(24),
-              ),
-              child: const Icon(
-                Icons.music_note,
-                size: 64,
-                color: Colors.white,
+            ClipRRect(
+              borderRadius: BorderRadius.circular(24),
+              child: Image.asset(
+                'assets/logo.jpg',
+                width: 120,
+                height: 120,
+                fit: BoxFit.cover,
               ),
             ),
             const SizedBox(height: 32),
@@ -114,9 +110,9 @@ class HomeScreen extends StatelessWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Music Share'),
-content: const Text(
-            'This app helps you share music links in a smart way.\n\n1. Click share from any music app\n2. Select Music Share\n3. Receivers get links for all popular services\n4. They listen on their favorite platform',
+        title: const Text('PulseShare'),
+        content: const Text(
+            'This app helps you share music links in a smart way.\n\n1. Click share from any music app\n2. Select PulseShare\n3. Receivers get links for all popular services\n4. They listen on their favorite platform',
           ),
         actions: [
           TextButton(
@@ -140,7 +136,7 @@ content: const Text(
             children: [
               const Text('1️⃣ Share from any music app'),
               const SizedBox(height: 8),
-              const Text('2️⃣ Select "Music Share" from share menu'),
+              const Text('2️⃣ Select "PulseShare" from share menu'),
               const SizedBox(height: 8),
               const Text('3️⃣ App analyzes and extracts song info'),
               const SizedBox(height: 8),

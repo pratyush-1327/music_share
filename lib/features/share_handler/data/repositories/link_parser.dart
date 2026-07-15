@@ -1,5 +1,5 @@
 import 'package:flutter/foundation.dart';
-import 'package:music_share/core/constants/music_services.dart';
+import 'package:pulse_share/core/constants/music_services.dart';
 import '../models/music_link.dart';
 
 class LinkParser {

@@ -1,4 +1,4 @@
-package com.example.music_share
+package com.example.pulse_share
 
 import io.flutter.embedding.android.FlutterActivity
 

@@ -1,6 +1,6 @@
 {
-    "name": "music_share",
-    "short_name": "music_share",
+    "name": "PulseShare",
+    "short_name": "PulseShare",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

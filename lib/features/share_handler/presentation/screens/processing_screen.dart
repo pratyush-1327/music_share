@@ -9,7 +9,7 @@ class ProcessingScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Music Share'),
+        title: const Text('PulseShare'),
       ),
       body: Center(
         child: Column(

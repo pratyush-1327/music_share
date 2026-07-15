@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:music_share/core/constants/music_services.dart';
-import 'package:music_share/features/share_handler/services/share_intent_service.dart';
-import 'package:music_share/features/share_handler/data/models/music_link.dart';
+import 'package:pulse_share/core/constants/music_services.dart';
+import 'package:pulse_share/features/share_handler/services/share_intent_service.dart';
+import 'package:pulse_share/features/share_handler/data/models/music_link.dart';
 
 class ResultScreen extends StatelessWidget {
   const ResultScreen({super.key});
@@ -11,7 +11,7 @@ class ResultScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Music Share'),
+        title: const Text('PulseShare'),
       ),
       body: Consumer<ShareIntentService>(
         builder: (context, service, child) {
