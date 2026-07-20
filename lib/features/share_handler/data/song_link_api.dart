@@ -24,8 +24,6 @@ class SongLinkApiService {
     'appleMusic': 'apple_music',
     'youtubeMusic': 'youtube_music',
     'youtube': 'youtube',
-    'soundcloud': 'soundcloud',
-    'deezer': 'deezer',
     'amazonMusic': 'amazon_music',
     'amazon': 'amazon_music',
     'tidal': 'tidal',
@@ -163,8 +161,6 @@ class SongLinkApiService {
         'spotify': RegExp(r'https://open\.spotify\.com/track/[a-zA-Z0-9]+'),
         'appleMusic': RegExp("https://music\\.apple\\.com/[^\\s\"']+"),
         'youtube': RegExp(r'https://(?:youtu\.be/|www\.youtube\.com/watch\?v=)[a-zA-Z0-9_-]+'),
-        'soundcloud': RegExp("https://soundcloud\\.com/[^\\s\"']+"),
-        'deezer': RegExp(r'https://www\.deezer\.com/track/\d+'),
         'tidal': RegExp(r'https://listen\.tidal\.com/track/\d+'),
       };
 

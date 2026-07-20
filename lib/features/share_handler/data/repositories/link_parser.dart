@@ -33,20 +33,6 @@ class LinkParser {
       ],
     ),
     _ServiceConfig(
-      service: MusicServices.soundCloud,
-      idPatterns: [
-        RegExp(r'soundcloud\.com/[\w-]+/[\w-]+'),
-        RegExp(r'on\.soundcloud\.com/[\w-]+/[\w-]+'),
-      ],
-    ),
-    _ServiceConfig(
-      service: MusicServices.deezer,
-      idPatterns: [
-        RegExp(r'deezer\.com/track/(\d+)'),
-        RegExp(r'deezer\.com/[\w-]+/track/(\d+)'),
-      ],
-    ),
-    _ServiceConfig(
       service: MusicServices.amazonMusic,
       idPatterns: [
         RegExp(r'music\.amazon\.com/[\w-]+/[\w-]+/(\w+)'),
@@ -116,7 +102,7 @@ class LinkParser {
     // Check common generic words
     final genericWords = {
       'music', 'track', 'song', 'album', 'watch', 'browse', 'search', 'video', 'audio',
-      'spotify', 'apple music', 'youtube', 'youtube music', 'soundcloud', 'deezer', 'tidal', 'amazon music', 'web player'
+      'spotify', 'apple music', 'youtube', 'youtube music', 'tidal', 'amazon music', 'web player'
     };
     if (genericWords.contains(clean)) return true;
 
@@ -146,7 +132,6 @@ class LinkParser {
     } else if (originalUrl.isNotEmpty) {
       // Only extract title from URL if the service stores the title in the URL path
       final canExtract = sourceService == null ||
-          sourceService.id == 'soundcloud' ||
           (sourceService.id == 'apple_music' && originalUrl.contains('/album/'));
       if (canExtract) {
         final extracted = _extractTitleFromUrl(originalUrl);
@@ -186,28 +171,14 @@ class LinkParser {
       availableLinks.add(ServiceLink(service: MusicServices.youtube, url: 'https://www.youtube.com/results?search_query=$encodedQuery'));
     }
 
-    // 5. SoundCloud
-    if (sourceService?.id == 'soundcloud') {
-      availableLinks.add(ServiceLink(service: MusicServices.soundCloud, url: originalUrl));
-    } else if (encodedQuery != null) {
-      availableLinks.add(ServiceLink(service: MusicServices.soundCloud, url: 'https://soundcloud.com/search?q=$encodedQuery'));
-    }
-
-    // 6. Deezer
-    if (sourceService?.id == 'deezer' && trackId != null) {
-      availableLinks.add(ServiceLink(service: MusicServices.deezer, url: 'https://www.deezer.com/track/$trackId'));
-    } else if (encodedQuery != null) {
-      availableLinks.add(ServiceLink(service: MusicServices.deezer, url: 'https://www.deezer.com/search/$encodedQuery'));
-    }
-
-    // 7. Amazon Music
+    // 5. Amazon Music
     if (sourceService?.id == 'amazon_music' && trackId != null) {
       availableLinks.add(ServiceLink(service: MusicServices.amazonMusic, url: 'https://music.amazon.com/search/$encodedQuery'));
     } else if (encodedQuery != null) {
       availableLinks.add(ServiceLink(service: MusicServices.amazonMusic, url: 'https://music.amazon.com/search/$encodedQuery'));
     }
 
-    // 8. Tidal
+    // 6. Tidal
     if (sourceService?.id == 'tidal' && trackId != null) {
       availableLinks.add(ServiceLink(service: MusicServices.tidal, url: 'https://listen.tidal.com/track/$trackId'));
     } else if (encodedQuery != null) {
