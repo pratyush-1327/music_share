@@ -104,8 +104,6 @@ class MusicServices {
         appleMusic,
         youtubeMusic,
         youtube,
-        soundCloud,
-        deezer,
         amazonMusic,
         tidal,
       ];
@@ -120,10 +118,6 @@ class MusicServices {
         return 'https://music.youtube.com/watch?v=$trackId';
       case 'youtube':
         return 'https://youtu.be/$trackId';
-      case 'soundcloud':
-        return 'https://soundcloud.com/search?q=$trackId';
-      case 'deezer':
-        return 'https://www.deezer.com/track/$trackId';
       case 'amazon_music':
         return 'https://music.amazon.com/search?q=$trackId';
       case 'tidal':
@@ -155,10 +149,6 @@ class MusicServices {
         return 'https://music.youtube.com/search?q=$query';
       case 'youtube':
         return 'https://www.youtube.com/results?search_query=$query';
-      case 'soundcloud':
-        return 'https://soundcloud.com/search?q=$query';
-      case 'deezer':
-        return 'https://www.deezer.com/search/$query';
       case 'amazon_music':
         return 'https://music.amazon.com/search/$query';
       case 'tidal':
