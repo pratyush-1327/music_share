@@ -173,10 +173,6 @@ class ResultScreen extends StatelessWidget {
       case 'youtube_music':
       case 'youtube':
         return Icons.play_circle;
-      case 'soundcloud':
-        return Icons.cloud;
-      case 'deezer':
-        return Icons.headphones;
       case 'amazon_music':
         return Icons.shopping_bag;
       case 'tidal':
